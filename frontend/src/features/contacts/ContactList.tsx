@@ -5,51 +5,79 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Contact } from "./models"
 import { PencilIcon } from "lucide-react"
-import { useConfiguration } from "@/providers/ConfigurationProvider"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import ContactForm, { ContactFormValues } from "./ContactForm"
+import { useContacts } from "./ContectProvider"
+import { toast } from "@/hooks/use-toast"
 
 
-interface ContactsDataGridProps {
-    contacts: Contact[]
-}
 
-const ContactsDataGrid:React.FC<ContactsDataGridProps> = ({contacts}) => {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [filteredContacts, setFilteredContacts] = useState<Contact[]>([])
-  const {configuration} = useConfiguration()
-
-  const ITEMS_PER_PAGE = configuration?.numberOfItemsPerPage ?? 15
+const ContactsDataGrid:React.FC = () => {
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [editingContact, setEditingContact] = useState<Contact | null>(null)
+  const {reloadContacts, contacts, addContact, updateContact, searchTerm, setSearchTerm
+    , filteredContacts, startIndex, endIndex, currentPage, setCurrentPage
+    , totalPages, error} = useContacts()
+  
 
   useEffect(() => {
-    const filtered = contacts.filter((contact) =>
-      Object.values(contact).some((value) => value.toLowerCase().includes(searchTerm.toLowerCase())),
-    )
-    setFilteredContacts(filtered)
-    setCurrentPage(1)
-  }, [contacts, searchTerm])
-
-  const totalPages = Math.ceil(filteredContacts.length / ITEMS_PER_PAGE)
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-  const endIndex = startIndex + ITEMS_PER_PAGE
-  const currentContacts = filteredContacts.slice(startIndex, endIndex)
+    reloadContacts()
+  }, [])
+  
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: `Failed to process request. Plesae review application logs for more details.`,
+        variant: "destructive",
+      })
+    }
+  }, [error])
 
   const handleEdit = (id: string) => {
-    console.log(`Edit contact with id: ${id}`)
-    // Implement edit functionality here
+    const contact = contacts.find((c) => c.id === id) || null
+    setEditingContact(contact)
+    setSheetOpen(true)
+  }
+
+  const handleAdd = () => {
+    setEditingContact(null)
+    setSheetOpen(true)
+  }
+
+  const handleFormSubmit = (values: ContactFormValues) => {
+    if (editingContact) {
+      updateContact(editingContact.id, values, () => setSheetOpen(false));
+    } else {
+      addContact(values, () => setSheetOpen(false));
+    }
   }
 
   return (
     <div className="container mx-auto p-4">
-      <div className="mb-4">
+      <div className="mb-4 flex justify-between items-center">
         <Input
           type="text"
           placeholder="Search contacts..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full"
+          className="w-full max-w-md"
         />
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+          <SheetTrigger asChild>
+            <Button onClick={handleAdd} className="ml-4">Add Contact</Button>
+          </SheetTrigger>
+          <SheetContent side="right">
+            <SheetHeader>
+              <SheetTitle>{editingContact ? "Edit Contact" : "Add Contact"}</SheetTitle>
+            </SheetHeader>
+            <ContactForm
+              initialValues={editingContact || undefined}
+              onSubmit={handleFormSubmit}
+            />
+          </SheetContent>
+        </Sheet>
       </div>
-
       <Table>
         <TableHeader>
           <TableRow>
@@ -64,7 +92,7 @@ const ContactsDataGrid:React.FC<ContactsDataGridProps> = ({contacts}) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentContacts.map((contact) => (
+          {filteredContacts.slice(startIndex, endIndex).map((contact) => (
             <TableRow key={contact.id}>
               <TableCell>{contact.id}</TableCell>
               <TableCell>{contact.first_name}</TableCell>
@@ -74,7 +102,7 @@ const ContactsDataGrid:React.FC<ContactsDataGridProps> = ({contacts}) => {
               <TableCell>{contact.city}</TableCell>
               <TableCell>{contact.country}</TableCell>
               <TableCell>
-              <button
+                <button
                   onClick={() => handleEdit(contact.id)}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   aria-label={`Edit ${contact.first_name} ${contact.last_name}`}
