@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "update:shadcn": "find src/components/ui -type f -name '*.tsx' -exec basename {} .tsx \\; | while read comp; do echo \"Updating $comp...\"; npx shadcn@latest add \"$comp\"; done"
+    "update:shadcn": "find src/components/ui -type f -name '*.tsx' -exec basename {} .tsx \\; | while read comp; do echo \"Updating $comp...\"; npx shadcn@latest add -y -o \"$comp\"; done"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
