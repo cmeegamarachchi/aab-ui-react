@@ -30,6 +30,9 @@ const ContactsDataGrid:React.FC = () => {
         title: "Error",
         description: `Failed to process request. Plesae review application logs for more details.`,
         variant: "destructive",
+        onClick: (e) => {
+          e.stopPropagation();
+        },
       })
     }
   }, [error])
@@ -85,6 +88,7 @@ const ContactsDataGrid:React.FC = () => {
             <TableHead>First Name</TableHead>
             <TableHead>Last Name</TableHead>
             <TableHead>Email</TableHead>
+            <TableHead>Signed on</TableHead>
             <TableHead>Street Address</TableHead>
             <TableHead>City</TableHead>
             <TableHead>Country</TableHead>
@@ -98,6 +102,7 @@ const ContactsDataGrid:React.FC = () => {
               <TableCell>{contact.first_name}</TableCell>
               <TableCell>{contact.last_name}</TableCell>
               <TableCell>{contact.email}</TableCell>
+              <TableCell>{contact.signed_on_date ? new Date(contact.signed_on_date).toLocaleDateString() : 'N/A'}</TableCell>
               <TableCell>{contact.street_address}</TableCell>
               <TableCell>{contact.city}</TableCell>
               <TableCell>{contact.country}</TableCell>

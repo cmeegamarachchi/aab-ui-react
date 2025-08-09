@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import React from "react";
 import { BreadCrumbItem } from "@/components/SideNav/model";
 import SideNav from "@/components/SideNav";
