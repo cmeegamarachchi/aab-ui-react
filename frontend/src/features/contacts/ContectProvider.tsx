@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Contact } from "./models";
+import type { Contact } from "./models";
 import useHttp from "@/hooks/useHttp";
 import { useConfiguration } from "@/providers/ConfigurationProvider";
 
@@ -27,15 +27,15 @@ const defaultContactStoreProps: ContactStoreProps = {
     contacts: [],
     filteredContacts: [],
     reloadContacts: () => {},
-    addContact: (contact: Partial<Contact>, onSuccess = () => {}) => {},
-    updateContact: (id:string, contact: Partial<Contact>, onSuccess = () => {}) => {},
+    addContact: () => {},
+    updateContact: () => {},
     searchTerm: "",
-    setSearchTerm: (searchTerm: string) => {},
+    setSearchTerm: () => {},
     currentPage: 1,
-    setCurrentPage: (page: number | ((prev: number) => number)) => {},
+    setCurrentPage: () => {},
     totalPages: 0,
     itemsPerPage: 15,
-    setItemsPerPage: (itemsPerPage: number) => {},
+    setItemsPerPage: () => {},
     startIndex: 0,
     endIndex: 0,
     loading: false,
@@ -76,7 +76,7 @@ export const ContactContextProvider: React.FC<{ children: React.ReactNode }> = (
         // if contacts are an array and not empty, filter them
         const filtered = contacts.filter((c) =>
             Object.values(c).some((value) =>
-                value.toLowerCase().includes(searchTerm.toLowerCase())
+                String(value).toLowerCase().includes(searchTerm.toLowerCase())
             )
         );
         setFilteredContacts(filtered);
