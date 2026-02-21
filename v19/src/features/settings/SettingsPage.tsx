@@ -1,9 +1,25 @@
-import React from 'react'
+import type { BreadCrumbItem } from "@/components/SideNav/model";
+import Layout from "./../Layout";
+import SettingsForm from "./SettingsForm";
 
-const SettingsPage: React.FC = () => {
+const breadCrumbs: BreadCrumbItem[] = [
+  {
+    title: "Home",
+    url: "/",
+  },
+  {
+    title: "Settings",
+    url: "/settings",
+  },
+];
+
+const SettingsPage = () => {
   return (
-    <div>Settings</div>
-  )
-}
+    <Layout titleToActivate="Settings" breadcrumbs={breadCrumbs}>
+      <Layout.Title>Settings</Layout.Title>
+      <SettingsForm />
+    </Layout>
+  );
+};
 
-export default SettingsPage
+export default SettingsPage;

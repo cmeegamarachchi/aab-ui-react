@@ -5,6 +5,8 @@ import { ContactsPage } from "./features/contacts";
 import { SettingsPage } from "./features/settings";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { SidebarProvider } from "./components/ui/sidebar";
+import { ConfigurationProvider } from "./providers/ConfigurationProvider";
+import { Toaster } from "@/components/ui/sonner"
 
 const router = createBrowserRouter([
   {
@@ -37,8 +39,11 @@ function App() {
   return (
     <TooltipProvider>
       <SidebarProvider>
-        <RouterProvider router={router}></RouterProvider>
+        <ConfigurationProvider>
+          <RouterProvider router={router}></RouterProvider>
+        </ConfigurationProvider>
       </SidebarProvider>
+      <Toaster />
     </TooltipProvider>
   );
 }
