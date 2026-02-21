@@ -3,6 +3,8 @@ import { HomePage } from "./features/home";
 import { ErrorPage, Site404Page } from "./features/core";
 import { ContactsPage } from "./features/contacts";
 import { SettingsPage } from "./features/settings";
+import { TooltipProvider } from "./components/ui/tooltip";
+import { SidebarProvider } from "./components/ui/sidebar";
 
 const router = createBrowserRouter([
   {
@@ -31,13 +33,14 @@ const router = createBrowserRouter([
   },
 ]);
 
-
 function App() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <RouterProvider router={router}></RouterProvider>
-    </div>
-  )
+    <TooltipProvider>
+      <SidebarProvider>
+        <RouterProvider router={router}></RouterProvider>
+      </SidebarProvider>
+    </TooltipProvider>
+  );
 }
- 
-export default App
+
+export default App;
