@@ -3,12 +3,12 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Contact } from "./models"
+import type { Contact } from "./models"
 import { PencilIcon } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import ContactForm, { ContactFormValues } from "./ContactForm"
+import ContactForm, { type ContactFormValues } from "./ContactForm"
 import { useContacts } from "./ContectProvider"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 
 
@@ -26,14 +26,7 @@ const ContactsDataGrid:React.FC = () => {
   
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error",
-        description: `Failed to process request. Plesae review application logs for more details.`,
-        variant: "destructive",
-        onClick: (e) => {
-          e.stopPropagation();
-        },
-      })
+      toast.error("Failed to process request. Plesae review application logs for more details.")
     }
   }, [error])
 
