@@ -1,10 +1,12 @@
 import React from "react"
 import * as z from "zod"
-import { Input } from "@/components/ui/input"
+import { useForm } from "react-hook-form"
+
 import { Button } from "@/components/ui/button"
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/Form"
-import type { Contact } from "./models"
+import { FormBase, FormInput } from "@/components/Form"
 import { DatePicker } from "@/components/DatePicker"
+
+import type { Contact } from "./models"
 
 const contactSchema = z.object({
   id: z.string().optional(),
@@ -18,7 +20,6 @@ const contactSchema = z.object({
 })
 
 export type ContactFormValues = z.infer<typeof contactSchema>
-type ContactFormErrors = Partial<Record<keyof ContactFormValues, string>>
 
 interface ContactFormProps {
   initialValues?: Partial<Contact>
@@ -27,22 +28,23 @@ interface ContactFormProps {
 }
 
 const ContactForm: React.FC<ContactFormProps> = ({ initialValues, onSubmit, loading }) => {
-  const [values, setValues] = React.useState<ContactFormValues>({
-    id: initialValues?.id,
-    first_name: initialValues?.first_name ?? "",
-    last_name: initialValues?.last_name ?? "",
-    email: initialValues?.email ?? "",
-    signed_on_date: initialValues?.signed_on_date
-      ? new Date(initialValues.signed_on_date)
-      : new Date(),
-    street_address: initialValues?.street_address ?? "",
-    city: initialValues?.city ?? "",
-    country: initialValues?.country ?? "",
+  const form = useForm<ContactFormValues>({
+    defaultValues: {
+      id: initialValues?.id,
+      first_name: initialValues?.first_name ?? "",
+      last_name: initialValues?.last_name ?? "",
+      email: initialValues?.email ?? "",
+      signed_on_date: initialValues?.signed_on_date
+        ? new Date(initialValues.signed_on_date)
+        : new Date(),
+      street_address: initialValues?.street_address ?? "",
+      city: initialValues?.city ?? "",
+      country: initialValues?.country ?? "",
+    },
   })
-  const [errors, setErrors] = React.useState<ContactFormErrors>({})
 
   React.useEffect(() => {
-    setValues({
+    form.reset({
       id: initialValues?.id,
       first_name: initialValues?.first_name ?? "",
       last_name: initialValues?.last_name ?? "",
@@ -54,137 +56,73 @@ const ContactForm: React.FC<ContactFormProps> = ({ initialValues, onSubmit, load
       city: initialValues?.city ?? "",
       country: initialValues?.country ?? "",
     })
-    setErrors({})
-  }, [initialValues])
+  }, [initialValues, form])
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleSubmit = form.handleSubmit((values) => {
+    form.clearErrors()
 
     const parsed = contactSchema.safeParse(values)
     if (!parsed.success) {
-      const fieldErrors: ContactFormErrors = {}
       const zodErrors = parsed.error.flatten().fieldErrors
 
-      if (zodErrors.first_name?.[0]) fieldErrors.first_name = zodErrors.first_name[0]
-      if (zodErrors.last_name?.[0]) fieldErrors.last_name = zodErrors.last_name[0]
-      if (zodErrors.email?.[0]) fieldErrors.email = zodErrors.email[0]
-      if (zodErrors.signed_on_date?.[0]) fieldErrors.signed_on_date = zodErrors.signed_on_date[0]
-      if (zodErrors.street_address?.[0]) fieldErrors.street_address = zodErrors.street_address[0]
-      if (zodErrors.city?.[0]) fieldErrors.city = zodErrors.city[0]
-      if (zodErrors.country?.[0]) fieldErrors.country = zodErrors.country[0]
+      if (zodErrors.first_name?.[0]) {
+        form.setError("first_name", { message: zodErrors.first_name[0] })
+      }
+      if (zodErrors.last_name?.[0]) {
+        form.setError("last_name", { message: zodErrors.last_name[0] })
+      }
+      if (zodErrors.email?.[0]) {
+        form.setError("email", { message: zodErrors.email[0] })
+      }
+      if (zodErrors.signed_on_date?.[0]) {
+        form.setError("signed_on_date", { message: zodErrors.signed_on_date[0] })
+      }
+      if (zodErrors.street_address?.[0]) {
+        form.setError("street_address", { message: zodErrors.street_address[0] })
+      }
+      if (zodErrors.city?.[0]) {
+        form.setError("city", { message: zodErrors.city[0] })
+      }
+      if (zodErrors.country?.[0]) {
+        form.setError("country", { message: zodErrors.country[0] })
+      }
 
-      setErrors(fieldErrors)
       return
     }
 
-    setErrors({})
     onSubmit(parsed.data)
-  }
+  })
 
   return (
-    <Form>
+    <>
       <form onSubmit={handleSubmit} className="space-y-4 m-4">
-        <FormField name="first_name" error={errors.first_name}>
-          <FormItem>
-            <FormLabel>First Name</FormLabel>
-            <FormControl>
-              <Input
-                name="first_name"
-                value={values.first_name}
-                onChange={(event) => setValues((current) => ({ ...current, first_name: event.target.value }))}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField name="last_name" error={errors.last_name}>
-          <FormItem>
-            <FormLabel>Last Name</FormLabel>
-            <FormControl>
-              <Input
-                name="last_name"
-                value={values.last_name}
-                onChange={(event) => setValues((current) => ({ ...current, last_name: event.target.value }))}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField name="email" error={errors.email}>
-          <FormItem>
-            <FormLabel>Email</FormLabel>
-            <FormControl>
-              <Input
-                name="email"
-                type="email"
-                value={values.email}
-                onChange={(event) => setValues((current) => ({ ...current, email: event.target.value }))}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField name="signed_on_date" error={errors.signed_on_date}>
-          <FormItem>
-            <FormLabel>Sign on date</FormLabel>
-            <FormControl>
-              <DatePicker
-                date={values.signed_on_date}
-                onChange={(date) => {
-                  if (date) {
-                    setValues((current) => ({ ...current, signed_on_date: date }))
-                  }
-                }}
-                placeholder="Select end date"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField name="street_address" error={errors.street_address}>
-          <FormItem>
-            <FormLabel>Street Address</FormLabel>
-            <FormControl>
-              <Input
-                name="street_address"
-                value={values.street_address}
-                onChange={(event) => setValues((current) => ({ ...current, street_address: event.target.value }))}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField name="city" error={errors.city}>
-          <FormItem>
-            <FormLabel>City</FormLabel>
-            <FormControl>
-              <Input
-                name="city"
-                value={values.city}
-                onChange={(event) => setValues((current) => ({ ...current, city: event.target.value }))}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
-        <FormField name="country" error={errors.country}>
-          <FormItem>
-            <FormLabel>Country</FormLabel>
-            <FormControl>
-              <Input
-                name="country"
-                value={values.country}
-                onChange={(event) => setValues((current) => ({ ...current, country: event.target.value }))}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        </FormField>
+        <FormInput control={form.control} name="first_name" label="First Name" />
+        <FormInput control={form.control} name="last_name" label="Last Name" />
+        <FormInput control={form.control} name="email" label="Email" type="email" />
+
+        <FormBase control={form.control} name="signed_on_date" label="Sign on date">
+          {(field) => (
+            <DatePicker
+              date={field.value instanceof Date ? field.value : new Date()}
+              onChange={(date) => {
+                if (date) {
+                  field.onChange(date)
+                }
+              }}
+              placeholder="Select end date"
+            />
+          )}
+        </FormBase>
+
+        <FormInput control={form.control} name="street_address" label="Street Address" />
+        <FormInput control={form.control} name="city" label="City" />
+        <FormInput control={form.control} name="country" label="Country" />
+
         <Button type="submit" disabled={loading}>
           {loading ? "Saving..." : "Save"}
         </Button>
       </form>
-    </Form>
+    </>
   )
 }
 
